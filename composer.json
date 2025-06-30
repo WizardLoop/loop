@@ -1,0 +1,15 @@
+{
+    "name": "wizardloop/loop",
+    "description": "A set of powerful async loop APIs based on amphp for executing operations periodically or on demand, in background loops a-la threads.",
+    "type": "library",
+    "require": {
+        "amphp/amp": "^3.0",
+        "dragonmantank/cron-expression": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "WizardLoop\\Loop\\": "."
+        }
+    },
+    "license": "MIT"
+} 
