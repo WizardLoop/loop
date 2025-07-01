@@ -4,7 +4,6 @@ namespace WizardLoop\Loop;
 
 use Amp\Future;
 use function Amp\async;
-use Amp\Cancellation;
 use function Amp\delay;
 use Cron\CronExpression;
 
@@ -14,9 +13,9 @@ use Cron\CronExpression;
  */
 class PeriodicLoop extends GenericLoop
 {
-/**
- * @var float|callable|string
- */
+    /**
+     * @var float|callable|string
+     */
     private $interval;
     private $callback;
     private $maxTicks = null;
@@ -50,7 +49,7 @@ class PeriodicLoop extends GenericLoop
             $this->tickCount = 0;
             while ($this->running) {
                 while ($this->paused) {
-                    yield delay(0.05); // Wait while paused
+                    yield delay(0.01);
                 }
                 try {
                     ($this->callback)();
@@ -76,7 +75,7 @@ class PeriodicLoop extends GenericLoop
                 } else {
                     $interval = is_callable($this->interval) ? ($this->interval)() : $this->interval;
                 }
-                yield delay($interval);
+                yield delay(max($interval, 0.001));
             }
         });
     }
