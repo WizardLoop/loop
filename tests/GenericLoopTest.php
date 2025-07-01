@@ -59,7 +59,7 @@ class GenericLoopTest extends TestCase
 
         async(function () use ($loop) {
             $loop->start();
-            yield delay(0.005);
+            yield delay(0.01);
             $loop->stop();
         })->await();
 
@@ -79,7 +79,7 @@ class GenericLoopTest extends TestCase
 
         async(function () use ($loop) {
             $loop->start();
-            yield delay(0.005);
+            yield delay(0.01);
             $loop->stop();
         })->await();
 
@@ -99,7 +99,7 @@ class GenericLoopTest extends TestCase
 
         async(function () use ($loop) {
             $loop->start();
-            yield delay(0.005);
+            yield delay(0.01);
             $loop->stop();
         })->await();
 
@@ -112,14 +112,14 @@ class GenericLoopTest extends TestCase
         $loop = new DummyLoop(false, 3);
         $loop->onTick(function () use (&$ticks) { $ticks++; });
 
-        async(function () use ($loop) {
+        async(function () use ($loop, &$ticks) {
             $loop->start();
-            yield delay(0.002);
+            yield delay(0.003);
             $loop->pause();
             $countAtPause = $ticks;
-            yield delay(0.005);
+            yield delay(0.01);
             $loop->resume();
-            yield delay(0.005);
+            yield delay(0.01);
             $loop->stop();
             $this->assertEquals($countAtPause, $ticks, "No new ticks should happen during pause");
         })->await();
