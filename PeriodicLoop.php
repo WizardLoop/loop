@@ -14,7 +14,10 @@ use Cron\CronExpression;
  */
 class PeriodicLoop extends GenericLoop
 {
-    private float|callable|string $interval;
+/**
+ * @var float|callable|string
+ */
+    private $interval;
     private $callback;
     private $maxTicks = null;
     private $tickCount = 0;
