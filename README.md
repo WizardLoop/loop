@@ -1,6 +1,6 @@
 # WizardLoop Loop
 
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Made with ❤️](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F-blue)](https://github.com/WizardLoop/loop)
 [![Code Style](https://img.shields.io/badge/Code_Style-PSR--12-blue.svg)](https://www.php-fig.org/psr/psr-12/)
 [![Tests](https://img.shields.io/badge/Tests-PHPUnit-6DB33F?logo=phpunit)](https://phpunit.de/)
