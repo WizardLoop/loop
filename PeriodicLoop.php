@@ -18,7 +18,6 @@ class PeriodicLoop extends GenericLoop
     private $maxTicks = null;
     private $tickCount = 0;
     private $cron = null;
-    private ?DeferredFuture $deferred = null;
 
     public function __construct($interval, callable $callback, callable $onTick = null, callable $onError = null, ?int $maxTicks = null)
     {
