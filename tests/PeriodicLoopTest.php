@@ -1,3 +1,5 @@
+<?php
+
 use PHPUnit\Framework\TestCase;
 use WizardLoop\Loop\PeriodicLoop;
 use function Amp\async;
