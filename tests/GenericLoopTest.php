@@ -2,12 +2,14 @@
 
 use PHPUnit\Framework\TestCase;
 use WizardLoop\Loop\GenericLoop;
-use function Amp\async;
 use Amp\Future;
+use function Amp\async;
 
-class DummyLoop extends GenericLoop {
-    protected function runLoop(): Future {
-        return async(fn() => null); 
+class DummyLoop extends GenericLoop
+{
+    protected function runLoop(): Future
+    {
+        return async(fn() => null);
     }
 }
 
@@ -46,20 +48,16 @@ class GenericLoopTest extends TestCase
     public function testErrorHandling()
     {
         $loop = new DummyLoop();
-
         $errorCalled = false;
+
         $loop->onError(function () use (&$errorCalled) {
             $errorCalled = true;
         });
 
-        if (method_exists($loop, 'onError')) {
-            $loop->onError(function () use (&$errorCalled) {
-                $errorCalled = true;
-            });
-        }
         if (is_callable($loop->onError ?? null)) {
-            ($loop->onError)();
+            ($loop->onError)(new \Exception('Test'));
         }
-        $this->assertTrue($errorCalled);
+
+        $this->assertTrue($errorCalled, "onError callback should be called.");
     }
 }
