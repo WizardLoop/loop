@@ -23,7 +23,7 @@ class PeriodicLoopTest extends TestCase
     public function testCronSyntax()
     {
         $this->expectException(\InvalidArgumentException::class);
-        // Please note! cron must have only 5 fields, not 6!
-        $loop = new PeriodicLoop('* * * * *', function () { });
+
+        $loop = new PeriodicLoop('*', function () { });
     }
 }
