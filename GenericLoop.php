@@ -2,20 +2,19 @@
 
 namespace WizardLoop\Loop;
 
-use Amp\Future;
 use Amp\DeferredFuture;
-use function Amp\async;
+use Amp\Future;
 
 abstract class GenericLoop
 {
     protected bool $running = false;
     protected ?Future $loopFuture = null;
+    protected ?DeferredFuture $deferred = null;
     protected $onStart = null;
     protected $onTick = null;
     protected $onStop = null;
     protected $onError = null;
     protected bool $paused = false;
-    protected ?DeferredFuture $deferred = null;
 
     public function onStart(callable $callback): void
     {
@@ -37,6 +36,9 @@ abstract class GenericLoop
         $this->onError = $callback;
     }
 
+    /**
+     * Start the loop in the background.
+     */
     public function start(): void
     {
         if ($this->running) {
@@ -49,37 +51,10 @@ abstract class GenericLoop
         $this->loopFuture = $this->runLoop();
     }
 
+    /**
+     * Stop the loop gracefully.
+     */
     public function stop(): void
     {
-        $this->running = false;
-        if ($this->onStop) {
-            ($this->onStop)();
-        }
-        if ($this->loopFuture) {
-            $this->loopFuture->await();
-            $this->loopFuture = null;
-        }
-    }
-
-    abstract protected function runLoop(): Future;
-
-    public function isRunning(): bool
-    {
-        return $this->running;
-    }
-
-    public function pause(): void
-    {
-        $this->paused = true;
-    }
-
-    public function resume(): void
-    {
-        $this->paused = false;
-    }
-
-    public function isPaused(): bool
-    {
-        return $this->paused;
-    }
-}
+        if (!$this->running) {
+            retur
