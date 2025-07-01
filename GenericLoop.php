@@ -3,6 +3,7 @@
 namespace WizardLoop\Loop;
 
 use Amp\Future;
+use Amp\DeferredFuture;
 use function Amp\async;
 
 abstract class GenericLoop
@@ -14,6 +15,7 @@ abstract class GenericLoop
     protected $onStop = null;
     protected $onError = null;
     protected bool $paused = false;
+    protected ?DeferredFuture $deferred = null;
 
     public function onStart(callable $callback): void
     {
@@ -53,7 +55,6 @@ abstract class GenericLoop
         if ($this->onStop) {
             ($this->onStop)();
         }
-        // ה־loopFuture מסתיים כשה־runLoop נגמר, אז מחכים לו
         if ($this->loopFuture) {
             $this->loopFuture->await();
             $this->loopFuture = null;
