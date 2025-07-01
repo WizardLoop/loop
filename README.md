@@ -3,26 +3,24 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Made with ❤️](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F-blue)](https://github.com/WizardLoop/loop)
 [![Code Style](https://img.shields.io/badge/Code_Style-PSR--12-blue.svg)](https://www.php-fig.org/psr/psr-12/)
-[![Tests](https://img.shields.io/badge/Tests-PHPUnit-6DB33F?logo=phpunit)](https://phpunit.de/)
 
 ---
 
-> **WizardLoop Loop** is a modern PHP async loop library built on [amphp](https://amphp.org/), providing powerful, flexible, and safe background loop APIs for periodic, on-demand, and cron-based execution—ideal for daemons, schedulers, and async workers.
+> **WizardLoop Loop** is a modern PHP async loop library powered by [amphp/amp v3](https://amphp.org/), designed for safe and flexible background job execution, daemon tasks, schedulers, and async bots.  
+> Easily run periodic/cyclic jobs, attach event hooks, and use cron or custom intervals — all with true async and pause/resume support.
 
 ---
 
-## 🚀 Features at a Glance
+## 🚀 Features
 
-| Feature                   | Description                                                             |
-|---------------------------|-------------------------------------------------------------------------|
-| Async Loops               | Run background operations with amphp's event loop                       |
-| Periodic Execution        | Execute callbacks at fixed, dynamic, or cron-based intervals            |
-| Pausing & Resuming        | Pause and resume loops at runtime                                       |
-| Max Ticks                 | Limit the number of executions                                          |
-| Event Hooks               | Attach callbacks for start, tick, stop, and error events                |
-| Error Handling            | Robust error capture and custom error hooks                             |
-| Custom Scheduling         | Use callables or cron syntax for advanced scheduling (5-field cron only) |
-| **Async/generator support** | Callbacks can be async/generator or sync functions                      |
+- 🌀 **Async Loops:** Built on Amp v3's event-loop engine for true async/await.
+- ⏱ **Periodic, Dynamic, or Cron-based Intervals:** Supports simple seconds, callables, and classic 5-field cron.
+- 🕹 **Pause & Resume:** Instantly pause/resume background loops at runtime.
+- 🛑 **Safe Stop/Start:** Loops can be safely started and stopped, even inside an async context.
+- 🏷 **Max Ticks:** Stop a loop after a set number of executions.
+- 🎛 **Event Hooks:** `onStart`, `onTick`, `onStop`, and `onError` hooks for custom logic.
+- ⚡ **Robust Error Handling:** All exceptions flow through your error callback.
+- 🧩 **Customizable Base:** Extend `GenericLoop` for advanced patterns.
 
 ---
 
@@ -37,29 +35,52 @@ composer require wizardloop/loop
 ## 🧙‍♂️ Quick Start
 
 ### Periodic Loop Example
+
 ```php
 use WizardLoop\Loop\PeriodicLoop;
+
+require 'vendor/autoload.php';
 
 $loop = new PeriodicLoop(2.0, function () {
     echo "Tick: " . time() . "\n";
 });
+
+$loop->onStart(fn() => echo "Loop started!\n");
+$loop->onTick(fn() => echo "Ticked!\n");
+$loop->onStop(fn() => echo "Loop stopped!\n");
+$loop->onError(fn($e) => echo "Error: {$e->getMessage()}\n");
+
 $loop->start();
-// ... do other async work ...
-$loop->stop();
+
+// Example: Stop the loop after 5 seconds (Amp async context required)
+Amp\async(function () use ($loop) {
+    yield Amp\delay(5);
+    $loop->stop();
+});
 ```
 
-### Custom Generic Loop Example
+---
+
+### Custom Loop Example
+
 ```php
 use WizardLoop\Loop\GenericLoop;
 use function Amp\async;
+use function Amp\delay;
 
 class MyLoop extends GenericLoop {
     protected function runLoop(): \Amp\Future {
-        return async(function () {
+        $this->deferred = new \Amp\DeferredFuture();
+        async(function () {
             while ($this->running) {
                 // Your async logic here
+                yield delay(1);
+            }
+            if ($this->deferred && !$this->deferred->isComplete()) {
+                $this->deferred->complete(null);
             }
         });
+        return $this->deferred->getFuture();
     }
 }
 ```
@@ -68,69 +89,36 @@ class MyLoop extends GenericLoop {
 
 ## 🎛️ Advanced Usage
 
-### Event Hooks & Error Handling
-Attach event hooks for full control:
-
-```php
-$loop->onStart(fn() => echo "Started!\n");
-$loop->onTick(fn() => echo "Ticked!\n");
-$loop->onStop(fn() => echo "Stopped!\n");
-$loop->onError(fn($e) => echo "Error: {$e->getMessage()}\n");
-```
-
-### Pausing & Resuming
-```php
-$loop->pause();  // Pauses the loop
-$loop->resume(); // Resumes ticking
-```
-
-### Max Ticks
-```php
-$loop = new PeriodicLoop(1.0, function () {
-    echo "Tick\n";
-}, null, null, 5); // Will stop after 5 ticks
-```
-
-### Custom Scheduling
-```php
-$intervals = [1.0, 2.0, 3.0];
-$loop = new PeriodicLoop(function () use (&$intervals) {
-    return array_shift($intervals) ?? 5.0;
-}, function () {
-    echo "Tick\n";
-});
-```
-
-### Cron Syntax
-> **Note:** Only 5-field cron syntax is supported, as in standard Unix cron. (e.g. `* * * * *` for every minute)
-
-```php
-$loop = new PeriodicLoop('* * * * *', function () {
-    echo "Tick every minute!\n";
-});
-```
-
-If you want to tick every second, use an interval of `1.0` seconds:
-```php
-$loop = new PeriodicLoop(1.0, function () {
-    echo "Tick every second!\n";
-});
-```
-
-### Async/Generator Callback Example
-The callback can be asynchronous:
-```php
-use function Amp\delay;
-
-$loop = new PeriodicLoop(0.5, function () use (&$calls) {
-    $calls++;
-    yield delay(0.01); // Fully async tick!
-});
-```
+- **Dynamic Intervals:**  
+  Pass a callable to `PeriodicLoop` for variable timing:
+  ```php
+  $intervals = [1.0, 2.0, 5.0];
+  $loop = new PeriodicLoop(function () use (&$intervals) {
+      return array_shift($intervals) ?? 10.0;
+  }, function () {
+      echo "Tick!\n";
+  });
+  ```
+- **Cron Support:**  
+  Use classic 5-field cron syntax (e.g. `* * * * *` for every minute):
+  ```php
+  $loop = new PeriodicLoop('* * * * *', function () {
+      echo "Tick every minute!\n";
+  });
+  ```
+- **Pause & Resume:**
+  ```php
+  $loop->pause();
+  $loop->resume();
+  ```
 
 ---
 
-## 🧪 Running Tests
+## 🧪 Testing & Development
+
+> **Note:**  
+> Unit tests require [PHPUnit 10+](https://phpunit.de/) and are fully async (Amp v3).  
+> You do **not** need the tests to use the library in production.
 
 ```bash
 composer install
@@ -139,16 +127,23 @@ vendor/bin/phpunit
 
 ---
 
-## 🤝 Contributing
+## 📜 License
 
-Pull requests and issues are welcome! Please ensure new features include tests and documentation.
+[MIT License](LICENSE)
 
 ---
 
-### 🆕 Version 2.0.0 – Major Update
+## 🤝 Contributing
 
-- **Async engine migrated to [amphp/amp v3](https://amphp.org/)**
-- **Core loop logic now uses DeferredFuture and true Future for reliable async support**
-- **stop() always awaits loop termination**
-- **Async/generator callbacks fully supported in all loops**
-- **
+PRs and issues are welcome!  
+For questions and feature requests, contact [@wizardloop](https://wizardloop.t.me/)  
+or open an issue on [GitHub](https://github.com/WizardLoop/loop).
+
+---
+
+## 🆕 Recent Changes
+
+- Full Amp v3 async engine, hooks, and deferred support
+- Safer pause/resume/stop behavior
+- 5-field cron only (not 6-field/secondly)
+- Strong async test coverage (for devs/CI)
