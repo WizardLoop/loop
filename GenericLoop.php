@@ -5,10 +5,6 @@ namespace WizardLoop\Loop;
 use Amp\Future;
 use function Amp\async;
 
-/**
- * Class GenericLoop
- * Provides a base async loop for executing operations periodically or on demand, in background loops a-la threads.
- */
 abstract class GenericLoop
 {
     protected bool $running = false;
@@ -56,6 +52,11 @@ abstract class GenericLoop
         $this->running = false;
         if ($this->onStop) {
             ($this->onStop)();
+        }
+        // ה־loopFuture מסתיים כשה־runLoop נגמר, אז מחכים לו
+        if ($this->loopFuture) {
+            $this->loopFuture->await();
+            $this->loopFuture = null;
         }
     }
 
