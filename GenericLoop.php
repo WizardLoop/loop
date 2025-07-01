@@ -57,4 +57,43 @@ abstract class GenericLoop
     public function stop(): void
     {
         if (!$this->running) {
-            retur
+            return;
+        }
+        $this->running = false;
+        if ($this->onStop) {
+            ($this->onStop)();
+        }
+        if ($this->deferred && !$this->deferred->isComplete()) {
+            $this->deferred->complete(null);
+        }
+        if ($this->loopFuture) {
+            $this->loopFuture->await();
+            $this->loopFuture = null;
+        }
+    }
+
+    /**
+     * The main loop logic. Should be implemented by subclasses.
+     */
+    abstract protected function runLoop(): Future;
+
+    public function isRunning(): bool
+    {
+        return $this->running;
+    }
+
+    public function pause(): void
+    {
+        $this->paused = true;
+    }
+
+    public function resume(): void
+    {
+        $this->paused = false;
+    }
+
+    public function isPaused(): bool
+    {
+        return $this->paused;
+    }
+}
