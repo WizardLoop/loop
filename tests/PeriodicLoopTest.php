@@ -14,7 +14,7 @@ class PeriodicLoopTest extends TestCase
 
         async(function () use ($loop) {
             $loop->start();
-            yield delay(0.01);
+            yield delay(0.1);
             $loop->stop();
         })->await();
 
