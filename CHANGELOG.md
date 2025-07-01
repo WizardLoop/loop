@@ -72,3 +72,24 @@ composer require wizardloop/loop
 ---
 
 _Enjoy the new power and reliability of WizardLoop Loop!_
+
+---
+
+## 📦 Version v2.0.1 – Minor Improvements & Fixes
+
+### 🛠 What's Changed?
+
+- Improved documentation and usage examples in README.md
+- Cleaned up async event loop handling for greater stability
+- Tweaked internal checks for safer pause, resume, and stop behavior
+- Enhanced code comments and PSR-12 formatting
+- [DEV] Minor test improvements for async test coverage
+
+---
+
+### 🆕 Recent Changes (since 2.0.0)
+
+- Full Amp v3 async engine, hooks, and deferred support
+- Safer pause/resume/stop behavior
+- 5-field cron only (not 6-field/secondly)
+- Strong async test coverage (for devs/CI)
