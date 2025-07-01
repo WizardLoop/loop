@@ -2,6 +2,7 @@
 
 namespace WizardLoop\Loop;
 
+use Amp\DeferredFuture;
 use Amp\Future;
 use function Amp\async;
 use function Amp\delay;
@@ -17,6 +18,7 @@ class PeriodicLoop extends GenericLoop
     private $maxTicks = null;
     private $tickCount = 0;
     private $cron = null;
+    private ?DeferredFuture $deferred = null;
 
     public function __construct($interval, callable $callback, callable $onTick = null, callable $onError = null, ?int $maxTicks = null)
     {
@@ -34,14 +36,20 @@ class PeriodicLoop extends GenericLoop
 
     protected function runLoop(): Future
     {
-        return async(function () {
+        $this->deferred = new DeferredFuture();
+        async(function () {
             $this->tickCount = 0;
             while ($this->running) {
                 while ($this->paused) {
                     yield delay(0.01);
                 }
                 try {
-                    ($this->callback)();
+                    $result = ($this->callback)();
+                    if ($result instanceof Future) {
+                        $result->await();
+                    } elseif ($result instanceof \Generator) {
+                        foreach ($result as $_) {}
+                    }
                     if ($this->onTick) {
                         ($this->onTick)();
                     }
@@ -66,6 +74,10 @@ class PeriodicLoop extends GenericLoop
                 }
                 yield delay(max($interval, 0.001));
             }
+            if ($this->deferred) {
+                $this->deferred->complete(null);
+            }
         });
+        return $this->deferred->getFuture();
     }
 }
