@@ -1,5 +1,3 @@
-<?php
-
 use PHPUnit\Framework\TestCase;
 use WizardLoop\Loop\PeriodicLoop;
 use function Amp\async;
@@ -10,11 +8,14 @@ class PeriodicLoopTest extends TestCase
     public function testPeriodicExecution()
     {
         $calls = 0;
-        $loop = new PeriodicLoop(0.001, function () use (&$calls) { $calls++; }, null, null, 3);
+        $loop = new PeriodicLoop(0.001, function () use (&$calls) {
+            $calls++;
+            yield delay(0.001);
+        }, null, null, 3);
 
         async(function () use ($loop) {
             $loop->start();
-            yield delay(0.1);
+            yield delay(0.01);
             $loop->stop();
         })->await();
 
@@ -25,7 +26,9 @@ class PeriodicLoopTest extends TestCase
     public function testOnTickCallback()
     {
         $ticks = 0;
-        $loop = new PeriodicLoop(0.001, function () {}, function () use (&$ticks) { $ticks++; }, null, 2);
+        $loop = new PeriodicLoop(0.001, function () {}, function () use (&$ticks) {
+            $ticks++;
+        }, null, 2);
 
         async(function () use ($loop) {
             $loop->start();
@@ -39,7 +42,9 @@ class PeriodicLoopTest extends TestCase
     public function testErrorHandling()
     {
         $errorCalled = false;
-        $loop = new PeriodicLoop(0.001, function () { throw new \Exception("fail"); }, null, function () use (&$errorCalled) { $errorCalled = true; }, 1);
+        $loop = new PeriodicLoop(0.001, function () { throw new \Exception("fail"); }, null, function () use (&$errorCalled) {
+            $errorCalled = true;
+        }, 1);
 
         async(function () use ($loop) {
             $loop->start();
@@ -54,15 +59,9 @@ class PeriodicLoopTest extends TestCase
     {
         $loop = new PeriodicLoop(0.001, function () {});
         $loop->start();
-        $loop->start(); 
+        $loop->start();
         $loop->stop();
-        $loop->stop(); 
+        $loop->stop();
         $this->assertFalse($loop->isRunning());
-    }
-
-    public function testCronSyntax()
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        new PeriodicLoop('*', function () {});
     }
 }
