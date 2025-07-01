@@ -54,11 +54,14 @@ class GenericLoopTest extends TestCase
             $errorCalled = true;
         });
 
-        $handler = (new \ReflectionClass($loop))->getProperty('onError');
-        $handler->setAccessible(true);
-        $cb = $handler->getValue($loop);
-        if (is_callable($cb)) {
-            $cb(new \Exception('test'));
+        $reflection = new \ReflectionClass($loop);
+        if ($reflection->hasProperty('onError')) {
+            $prop = $reflection->getProperty('onError');
+            $prop->setAccessible(true);
+            $cb = $prop->getValue($loop);
+            if (is_callable($cb)) {
+                $cb(new \Exception('test'));
+            }
         }
 
         $this->assertTrue($errorCalled, "onError callback should be called.");
