@@ -57,7 +57,6 @@ class GenericLoopTest extends TestCase
                 $errorCalled = true;
             });
         }
-
         if (is_callable($loop->onError ?? null)) {
             ($loop->onError)();
         }
