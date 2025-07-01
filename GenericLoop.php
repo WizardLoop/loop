@@ -114,4 +114,4 @@ abstract class GenericLoop
     {
         return $this->paused;
     }
-} 
+}
