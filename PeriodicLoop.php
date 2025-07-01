@@ -7,10 +7,6 @@ use function Amp\async;
 use function Amp\delay;
 use Cron\CronExpression;
 
-/**
- * Class PeriodicLoop
- * Executes a callback periodically in an async background loop.
- */
 class PeriodicLoop extends GenericLoop
 {
     /**
@@ -22,13 +18,6 @@ class PeriodicLoop extends GenericLoop
     private $tickCount = 0;
     private $cron = null;
 
-    /**
-     * @param float|callable|string $interval Interval in seconds, a callable returning float, or a cron string
-     * @param callable $callback The async callback to execute
-     * @param callable|null $onTick Callback to execute when the loop ticks
-     * @param callable|null $onError Callback to execute when an error occurs
-     * @param int|null $maxTicks Maximum number of ticks before stopping
-     */
     public function __construct($interval, callable $callback, callable $onTick = null, callable $onError = null, ?int $maxTicks = null)
     {
         if (is_string($interval)) {
