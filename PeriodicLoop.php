@@ -15,7 +15,6 @@ class PeriodicLoop extends GenericLoop
 {
     private float $interval;
     private $callback;
-    private $onTick;
     private $onError;
     private $maxTicks = null;
     private $tickCount = 0;
