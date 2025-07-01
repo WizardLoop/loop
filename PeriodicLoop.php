@@ -3,6 +3,7 @@
 namespace WizardLoop\Loop;
 
 use Amp\Future;
+use function Amp\async;
 use Amp\Cancellation;
 use function Amp\delay;
 use Cron\CronExpression;
@@ -13,7 +14,7 @@ use Cron\CronExpression;
  */
 class PeriodicLoop extends GenericLoop
 {
-    private float $interval;
+    private float|callable|string $interval;
     private $callback;
     private $maxTicks = null;
     private $tickCount = 0;
@@ -42,7 +43,7 @@ class PeriodicLoop extends GenericLoop
 
     protected function runLoop(): Future
     {
-        return Future\spawn(function () {
+        return async(function () {
             $this->tickCount = 0;
             while ($this->running) {
                 while ($this->paused) {
@@ -76,4 +77,4 @@ class PeriodicLoop extends GenericLoop
             }
         });
     }
-} 
+}
